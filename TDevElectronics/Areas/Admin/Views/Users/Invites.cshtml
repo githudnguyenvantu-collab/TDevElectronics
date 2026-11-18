@@ -1,0 +1,35 @@
+@model List<AdminInvite>
+@{
+    ViewData["Title"] = "Mã mời quản trị";
+    ViewBag.Page = "a-usr";
+    string State(AdminInvite i) => i.IsRevoked ? "Revoked" : i.UsedAt != null ? "Used" : i.ExpiresAt < DateTime.UtcNow ? "Expired" : "Active";
+}
+<section class="pg ad"><div class="ab">
+<p class="cr m"><a asp-action="Index">Users</a> / Invite codes</p>
+<h1>Mã mời quản trị</h1>
+<p class="m">Mã chỉ hiện đầy đủ một lần lúc tạo; ở đây chỉ thấy 4 ký tự cuối. Tạo mã mới ở trang Users.</p>
+@if (TempData["Success"] != null) { <div class="cd" style="border-left:4px solid #10b981;margin-bottom:16px">@TempData["Success"]</div> }
+<div class="tw"><table>
+    <tr><th>Đuôi mã</th><th>Email chỉ định</th><th>Tạo lúc</th><th>Hết hạn</th><th>Trạng thái</th><th></th></tr>
+    @foreach (var i in Model)
+    {
+        var st = State(i);
+        <tr>
+            <td><b>…@i.LastFourChars</b></td>
+            <td>@(i.TargetEmail ?? "Bất kỳ")</td>
+            <td>@i.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@i.ExpiresAt.ToString("dd/MM/yyyy HH:mm")</td>
+            <td><span class="tg @(st == "Active" ? "" : "n")">@st</span></td>
+            <td>
+                @if (st == "Active")
+                {
+                    <form asp-action="RevokeInvite" asp-route-id="@i.Id" method="post" onsubmit="return confirm('Thu hồi mã này?');">
+                        <button type="submit" class="bo sm danger">Revoke</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+</table></div>
+<p><a class="bo" asp-action="Index">Về danh sách người dùng</a></p>
+</div></section>
